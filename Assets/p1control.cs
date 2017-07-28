@@ -7,12 +7,15 @@ public class p1control : MonoBehaviour {
     CharacterController p1;
     public GameObject rc;
     public int moveSpeed = 1;
-    
-    int cur_pos;
+    public int money = 0;
+    public List<int> properties = new List<int>();
+
+    public int cur_pos;
 
     // Use this for initialization
     void Start () {
         p1 = GetComponent<CharacterController>();
+        this.money = 20000;
     }
 
     // Update is called once per frame
@@ -20,7 +23,7 @@ public class p1control : MonoBehaviour {
     }
     public void initCharPosition()
     {
-        transform.position = rc.transform.GetComponent<roadController>().roads[0].transform.position;
+        transform.position = rc.transform.GetComponent<roadController>().roads[0].transform.position + new Vector3(Random.Range(-0.01f, 0.01f), 0, Random.Range(-0.01f, 0.01f));
         cur_pos = 0;
     }
     public void movebystep(int steps)
@@ -31,8 +34,10 @@ public class p1control : MonoBehaviour {
 
         // p1.SimpleMove(transform.forward * moveSpeed);
         
+        rc.transform.GetComponent<roadController>().roads[(cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length].transform.GetComponent<block>().target = true;
         MoveToPoint((cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length,steps);
         cur_pos = (cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length;
+        //this.GetComponent<Rigidbody>().isKinematic = false;
     }
     Vector3 ignoreY(Vector3 v3)
     {
@@ -42,16 +47,19 @@ public class p1control : MonoBehaviour {
     {
         if (targetPosition == cur_pos)
             return;
-        
-        Transform[] points = new Transform[steps];
+
+        /*Transform[] points = new Transform[steps];
         for (int i = 0; i < steps; i++)
         {
+            if ((cur_pos + i + 1) % rc.transform.GetComponent<roadController>().roads.Length == 0)
+                this.money += 2000;
             points[i] = rc.transform.GetComponent<roadController>().roads[(cur_pos+i+1)%rc.transform.GetComponent<roadController>().roads.Length].transform;
             
         }
 
         foreach(Transform t in points)
         {
+            
             Vector3 moveDiff = t.position - transform.position;
             Vector3 moveDir = moveDiff.normalized * 50f * Time.deltaTime;
             if (moveDir.sqrMagnitude < moveDiff.sqrMagnitude)
@@ -62,12 +70,40 @@ public class p1control : MonoBehaviour {
             {
                 p1.Move(moveDiff);
             }
-        }
+        }*/
+        StartCoroutine(WalkAsync(steps));
 
     }
-    public void teleport(int pos)
+    public void Teleport(int pos)
     {
         transform.position = rc.transform.GetComponent<roadController>().roads[pos].position;
         cur_pos = (cur_pos + 3) % rc.transform.GetComponent<roadController>().roads.Length;
+    }
+    IEnumerator WalkAsync(int steps) {
+        Transform[] points = new Transform[steps];
+        for (int i = 0; i < steps; i++)
+        {
+            if ((cur_pos + i + 1) % rc.transform.GetComponent<roadController>().roads.Length == 0)
+                this.money += 2000;
+            points[i] = rc.transform.GetComponent<roadController>().roads[(cur_pos + i + 1) % rc.transform.GetComponent<roadController>().roads.Length].transform;
+
+        }
+
+        foreach (Transform t in points)
+        {
+
+            Vector3 moveDiff = t.position - transform.position;
+            Vector3 moveDir = moveDiff.normalized * 50f * Time.deltaTime;
+            if (moveDir.sqrMagnitude < moveDiff.sqrMagnitude)
+            {
+                p1.Move(moveDir);
+            }
+            else
+            {
+                p1.Move(moveDiff);
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+        
     }
 }

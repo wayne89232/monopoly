@@ -20,6 +20,7 @@ public class roadController : MonoBehaviour {
         }
         game.playerOrder[0].initCharPosition();
         game.playerOrder[1].initCharPosition();
+        game.playerOrder[1].GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         //game.playerOrder[1].gameObject.SetActive(false);
 
     }
@@ -27,9 +28,34 @@ public class roadController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         
-        if (Input.GetKeyDown(KeyCode.Alpha3)) {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+            game.playerOrder[game.curPlayer].movebystep(1);
+            //p1.teleport(3);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            game.playerOrder[game.curPlayer].movebystep(2);
+            //p1.teleport(3);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
             game.playerOrder[game.curPlayer].movebystep(3);
             //p1.teleport(3);
         }
-	}
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            game.playerOrder[game.curPlayer].movebystep(4);
+            //p1.teleport(3);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            game.playerOrder[game.curPlayer].movebystep(5);
+            //p1.teleport(3);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            game.playerOrder[game.curPlayer].movebystep(6);
+            //p1.teleport(3);
+        }
+    }
 }
