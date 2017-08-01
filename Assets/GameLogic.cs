@@ -37,6 +37,9 @@ public class GameLogic : MonoBehaviour {
     bool Flag_AllowStackWithoutConnectingBoard = true;
     public Dictionary<int, GameObject> build_Blocks = new Dictionary<int, GameObject>();  //BlockID
     public Vector2 PosMessage = new Vector2(0,0);
+    private int tempCount1 = 100;
+    private int tempCount2 = 100;
+
 
     // Use this for initialization
     void Start () {
@@ -115,9 +118,13 @@ public class GameLogic : MonoBehaviour {
     }
     private void CheckBlockStatus()
     {
-        foreach (int tmpID in RFIB.StackedOrders3D.Keys)
+        if (tempCount1 != RFIB.StackedOrders3D.Count)
         {
-            AddBuildBlocks(tmpID, RFIB.StackedOrders3D[tmpID][5], RFIB.StackedOrders3D[tmpID][0], RFIB.StackedOrders3D[tmpID][1], RFIB.StackedOrders3D[tmpID][2]);
+            foreach (int tmpID in RFIB.StackedOrders3D.Keys)
+            {
+                AddBuildBlocks(tmpID, RFIB.StackedOrders3D[tmpID][5], RFIB.StackedOrders3D[tmpID][0], RFIB.StackedOrders3D[tmpID][1], RFIB.StackedOrders3D[tmpID][2]);
+            }
+            tempCount1 = RFIB.StackedOrders3D.Count;
         }
 
         if (RFIB.StackedOrders3D.Count == 0 && build_Blocks.Count > 0)
@@ -126,34 +133,54 @@ public class GameLogic : MonoBehaviour {
             {
                 Destroy(build_Blocks[BlockID]);
                 build_Blocks.Remove(BlockID);
+                //send destroy message
+                //if player id, save position
+                if (isPlayer(BlockID))
+                    print(playerOrder[curPlayer].cur_pos);
+                    //lastPos = playerOrder[curPlayer].cur_pos;
+                else
+                {
+                    string[] temp = build_Blocks[BlockID].name.Split('/');
+                    print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
+                    //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
+                }
+
                 if (build_Blocks.Count == 0) break;
             }
 
-            //send destroy message
-
-            //if player id, save position
 
         }
 
-        if (build_Blocks.Count > 0)
+        if (tempCount2 != (build_Blocks.Count))
         {
-            try
+            if (build_Blocks.Count > 0)
             {
-                foreach (int BlockID in build_Blocks.Keys)
+                try
                 {
-                    if (RFIB.StackedOrders3D.ContainsKey(BlockID) == false)
+                    foreach (int BlockID in build_Blocks.Keys)
                     {
-                        Destroy(build_Blocks[BlockID]);
-                        build_Blocks.Remove(BlockID);
-                        // send destroy message
-
-                        // if player id, save position
-
+                        if (RFIB.StackedOrders3D.ContainsKey(BlockID) == false)
+                        {
+                            Destroy(build_Blocks[BlockID]);
+                            build_Blocks.Remove(BlockID);
+                            // send destroy message
+                            // if player id, save position
+                            if (isPlayer(BlockID))
+                                print(playerOrder[curPlayer].cur_pos);
+                                //lastPos = playerOrder[curPlayer].cur_pos;
+                            else
+                            {
+                                string [] temp = build_Blocks[BlockID].name.Split('/');
+                                print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
+                                //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
+                            }
+                        }
+                        if (build_Blocks.Count == 0) break;
                     }
-                    if (build_Blocks.Count == 0) break;
                 }
+                catch { }
             }
-            catch { }
+            tempCount2 = build_Blocks.Count;
         }
     }
 
@@ -193,25 +220,30 @@ public class GameLogic : MonoBehaviour {
             else
                 build_Blocks.Add(blockID, new GameObject());
 
-            build_Blocks[blockID].name = "Block-" + blockID;
-            //build_Blocks[blockID].GetComponent<Renderer>().material.color = tmpColor;
+            build_Blocks[blockID].name = "Block-" + blockID+"/"+X+"/"+Y;
 
             //if player id, send move steps
             // newPos (X,Y) - lastPos
+            if (isPlayer(blockID))
+            {
+                print((5 * Y + X) - lastPos);
+                //moveSteps = (5*Y+X)-lastPos;
+            }
 
             //send build string to check if correct position
             //PosMessage = new Vector2(X,Y);
+            else
+            {
+                string[] temp = build_Blocks[blockID].name.Split('/');
+                //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
+                print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
+            }
+
         }
     }
 
     public void keyPressed()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            print("StartToBuild.");
-            RFIB.startToBuild();
-            RFIB.printNoiseIDs();
-        }
 
         if (Input.GetKey("t"))
         {
@@ -226,5 +258,12 @@ public class GameLogic : MonoBehaviour {
 
         if (Input.GetKeyDown("o")) RFIB.printStackedOrders3D();
         if (Input.GetKeyDown("p")) RFIB.printStackedOrders();
+    }
+    bool isPlayer(int id)
+    {
+        if (id == 1234)
+            return true;
+        else
+            return false;
     }
 }
