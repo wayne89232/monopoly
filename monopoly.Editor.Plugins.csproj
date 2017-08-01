@@ -115,15 +115,27 @@
     <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
       <HintPath>Library\UnityAssemblies\SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
     </Reference>
+    <Reference Include="DLL">
+      <HintPath>Assets\DLL.dll</HintPath>
+    </Reference>
+    <Reference Include="LLRP.Impinj">
+      <HintPath>Assets\LLRP.Impinj.dll</HintPath>
+    </Reference>
+    <Reference Include="LLRP">
+      <HintPath>Assets\LLRP.dll</HintPath>
+    </Reference>
+    <Reference Include="Impinj.OctaneSdk">
+      <HintPath>Assets\Impinj.OctaneSdk.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="monopoly.csproj">
-      <Project>{1452A8AC-5BB6-D848-CA35-FCC15004FF3A}</Project>
-      <Name>monopoly</Name>
-    </ProjectReference>
     <ProjectReference Include="monopoly.Plugins.csproj">
       <Project>{59F85853-7F42-D305-1B10-174166F8FA67}</Project>
       <Name>monopoly.Plugins</Name>
+    </ProjectReference>
+    <ProjectReference Include="monopoly.csproj">
+      <Project>{1452A8AC-5BB6-D848-CA35-FCC15004FF3A}</Project>
+      <Name>monopoly</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

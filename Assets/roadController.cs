@@ -27,34 +27,42 @@ public class roadController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        
-        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+
+        // add steps from gamelogic
+
+        if (Input.GetKeyDown(KeyCode.Alpha1) || (game.moveSteps == 1)) {
             game.playerOrder[game.curPlayer].movebystep(1);
+            game.moveSteps = 0;
             //p1.teleport(3);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        else if (Input.GetKeyDown(KeyCode.Alpha2) || (game.moveSteps == 2))
         {
             game.playerOrder[game.curPlayer].movebystep(2);
+            game.moveSteps = 0;
             //p1.teleport(3);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        else if (Input.GetKeyDown(KeyCode.Alpha3) || (game.moveSteps == 3))
         {
             game.playerOrder[game.curPlayer].movebystep(3);
+            game.moveSteps = 0;
             //p1.teleport(3);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        else if (Input.GetKeyDown(KeyCode.Alpha4) || (game.moveSteps == 4))
         {
             game.playerOrder[game.curPlayer].movebystep(4);
+            game.moveSteps = 0;
             //p1.teleport(3);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        else if (Input.GetKeyDown(KeyCode.Alpha5) || (game.moveSteps == 5))
         {
             game.playerOrder[game.curPlayer].movebystep(5);
+            game.moveSteps = 0;
             //p1.teleport(3);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
+        else if (Input.GetKeyDown(KeyCode.Alpha6) || (game.moveSteps == 6))
         {
             game.playerOrder[game.curPlayer].movebystep(6);
+            game.moveSteps = 0;
             //p1.teleport(3);
         }
     }

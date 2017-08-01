@@ -20,23 +20,56 @@ public class block : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if((building == true) && Input.GetKeyDown(KeyCode.B))
+
+        // add new criterion from game logic
+        if ((building == true) && (Input.GetKeyDown(KeyCode.B)|| this.transform.parent.GetComponent<roadController>().game.PosMessage!= new Vector2(0,0))  )
         {
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.AddComponent<Rigidbody>();
-            cube.AddComponent<cube>();
-            cube.transform.position = transform.Find("build").transform.position + new Vector3(0, 0.3f, 0);
-            cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            Vector2 tempPos = this.transform.parent.GetComponent<roadController>().game.PosMessage;
+            if (tempPos != new Vector2(0, 0))
+            {
+                //check build position correct
+                int pos = this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].cur_pos;
+                if (pos == tempPos.y * 5 + tempPos.x)
+                {
+                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.AddComponent<Rigidbody>();
+                    cube.AddComponent<cube>();
+                    cube.transform.position = transform.Find("build").transform.position + new Vector3(0, 0.3f, 0);
+                    cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
-            if(buildStack.Count == 0){
-                this.property = this.transform.parent.GetComponent<roadController>().game.curPlayer+1;
-                this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].properties.Add(this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].cur_pos);
+                    if (buildStack.Count == 0)
+                    {
+                        this.property = this.transform.parent.GetComponent<roadController>().game.curPlayer + 1;
+                        this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].properties.Add(this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].cur_pos);
+                    }
+                    buildStack.Add(cube);
+                    this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money -= 5000;
+
+                    building = false;
+                    this.transform.parent.GetComponent<roadController>().game.turnChange = true;
+                }
+
+                this.transform.parent.GetComponent<roadController>().game.PosMessage = new Vector2(0, 0);
             }
-            buildStack.Add(cube);
-            this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money -= 5000;
+            else
+            {
+                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.AddComponent<Rigidbody>();
+                cube.AddComponent<cube>();
+                cube.transform.position = transform.Find("build").transform.position + new Vector3(0, 0.3f, 0);
+                cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
-            building = false;
-            this.transform.parent.GetComponent<roadController>().game.turnChange = true;
+                if (buildStack.Count == 0)
+                {
+                    this.property = this.transform.parent.GetComponent<roadController>().game.curPlayer + 1;
+                    this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].properties.Add(this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].cur_pos);
+                }
+                buildStack.Add(cube);
+                this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money -= 5000;
+
+                building = false;
+                this.transform.parent.GetComponent<roadController>().game.turnChange = true;
+            }
             
         }
         else if ((building == true) && Input.GetKeyDown(KeyCode.N))
@@ -49,7 +82,8 @@ public class block : MonoBehaviour {
             tolling = false;
             this.transform.parent.GetComponent<roadController>().game.turnChange = true;
         }
-        else if(mortgage && Input.GetKeyDown(KeyCode.Keypad1)) { 
+        // add new criterion from game logic
+        else if(mortgage && (Input.GetKeyDown(KeyCode.Keypad1) || this.transform.parent.GetComponent<roadController>().game.PosMessage != new Vector2(0, 0)) ) { 
 
             mortgage = false;
             roadController temp = this.transform.parent.GetComponent<roadController>();

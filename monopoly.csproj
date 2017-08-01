@@ -76,6 +76,18 @@
     <Reference Include="UnityEngine.HoloLens">
       <HintPath>Library\UnityAssemblies\UnityEngine.HoloLens.dll</HintPath>
     </Reference>
+    <Reference Include="DLL">
+      <HintPath>Assets\DLL.dll</HintPath>
+    </Reference>
+    <Reference Include="LLRP.Impinj">
+      <HintPath>Assets\LLRP.Impinj.dll</HintPath>
+    </Reference>
+    <Reference Include="LLRP">
+      <HintPath>Assets\LLRP.dll</HintPath>
+    </Reference>
+    <Reference Include="Impinj.OctaneSdk">
+      <HintPath>Assets\Impinj.OctaneSdk.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="monopoly.Plugins.csproj">
