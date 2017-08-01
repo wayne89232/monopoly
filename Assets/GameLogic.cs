@@ -37,8 +37,29 @@ public class GameLogic : MonoBehaviour {
     bool Flag_AllowStackWithoutConnectingBoard = true;
     public Dictionary<int, GameObject> build_Blocks = new Dictionary<int, GameObject>();  //BlockID
     public Vector2 PosMessage = new Vector2(0,0);
+	public int PosInt = 100;
     private int tempCount1 = 100;
     private int tempCount2 = 100;
+	Dictionary<Vector2, int> roadList = new Dictionary<Vector2, int>()
+	{
+		{ new Vector2(0,0), 0},
+		{ new Vector2(1,0), 1},
+		{ new Vector2(2,0), 2},
+		{ new Vector2(3,0), 3},
+		{ new Vector2(4,0), 4},
+		{ new Vector2(4,1), 5},
+		{ new Vector2(4,2), 6},
+		{ new Vector2(4,3), 7},
+		{ new Vector2(4,4), 8},
+		{ new Vector2(3,4), 9},
+		{ new Vector2(2,4), 10},
+		{ new Vector2(1,4), 11},
+		{ new Vector2(0,4), 12},
+		{ new Vector2(0,3), 13},
+		{ new Vector2(0,2), 14},
+		{ new Vector2(0,1), 15},
+	};
+
 
 
     // Use this for initialization
@@ -129,20 +150,21 @@ public class GameLogic : MonoBehaviour {
 
         if (RFIB.StackedOrders3D.Count == 0 && build_Blocks.Count > 0)
         {
-            foreach (int BlockID in build_Blocks.Keys)
+			var buffer = new List<int>(build_Blocks.Keys);
+
+			foreach (int BlockID in buffer)
             {
+				string [] temp = build_Blocks[BlockID].name.Split('/');
                 Destroy(build_Blocks[BlockID]);
                 build_Blocks.Remove(BlockID);
                 //send destroy message
                 //if player id, save position
                 if (isPlayer(BlockID))
-                    print(playerOrder[curPlayer].cur_pos);
-                    //lastPos = playerOrder[curPlayer].cur_pos;
+					print("(1)leave "+playerOrder[curPlayer].cur_pos);
                 else
                 {
-                    string[] temp = build_Blocks[BlockID].name.Split('/');
-                    print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
-                    //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
+					//print("(1)remove"+int.Parse(temp[1]));
+					PosInt = int.Parse(temp[1]);
                 }
 
                 if (build_Blocks.Count == 0) break;
@@ -150,42 +172,38 @@ public class GameLogic : MonoBehaviour {
 
 
         }
-
-        if (tempCount2 != (build_Blocks.Count))
-        {
-            if (build_Blocks.Count > 0)
+		else if (build_Blocks.Count > 0)
             {
-                try
-                {
-                    foreach (int BlockID in build_Blocks.Keys)
+               
+					var buffer = new List<int>(build_Blocks.Keys);
+
+					foreach (int BlockID in buffer)
                     {
+						string [] temp = build_Blocks[BlockID].name.Split('/');
                         if (RFIB.StackedOrders3D.ContainsKey(BlockID) == false)
                         {
                             Destroy(build_Blocks[BlockID]);
                             build_Blocks.Remove(BlockID);
                             // send destroy message
                             // if player id, save position
-                            if (isPlayer(BlockID))
-                                print(playerOrder[curPlayer].cur_pos);
-                                //lastPos = playerOrder[curPlayer].cur_pos;
-                            else
+							if (isPlayer(BlockID))
+								print("(2)leave "+playerOrder[curPlayer].cur_pos);
+							else
                             {
-                                string [] temp = build_Blocks[BlockID].name.Split('/');
-                                print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
-                                //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
+                                
+								print("(2)remove"+int.Parse(temp[1]));
+								PosInt = int.Parse(temp[1]);
                             }
                         }
                         if (build_Blocks.Count == 0) break;
                     }
-                }
-                catch { }
+                
             }
-            tempCount2 = build_Blocks.Count;
-        }
     }
 
     public void AddBuildBlocks(int blockID, int BlockType, int X, int Y, int Z)
     {
+		
         Color tmpColor = new Color(255, 0, 0);
 
         //========== Set Color ================
@@ -220,23 +238,28 @@ public class GameLogic : MonoBehaviour {
             else
                 build_Blocks.Add(blockID, new GameObject());
 
-            build_Blocks[blockID].name = "Block-" + blockID+"/"+X+"/"+Y;
+			build_Blocks[blockID].name = "Block-" + blockID+"/"+lastPos;
 
             //if player id, send move steps
             // newPos (X,Y) - lastPos
+
             if (isPlayer(blockID))
             {
-                print((5 * Y + X) - lastPos);
-                //moveSteps = (5*Y+X)-lastPos;
+				Vector2 a = new Vector2 (X, Y);
+				
+				//print(roadList[a] - lastPos);
+				if ((roadList[a] - lastPos) != 0) {
+					moveSteps = roadList[a] - lastPos;
+					lastPos = roadList[a];
+				}
             }
 
             //send build string to check if correct position
             //PosMessage = new Vector2(X,Y);
             else
             {
-                string[] temp = build_Blocks[blockID].name.Split('/');
-                //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
-                print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
+				print("build at"+lastPos);
+				PosInt = lastPos;
             }
 
         }
@@ -261,7 +284,7 @@ public class GameLogic : MonoBehaviour {
     }
     bool isPlayer(int id)
     {
-        if (id == 1234)
+        if (id == 930102)
             return true;
         else
             return false;

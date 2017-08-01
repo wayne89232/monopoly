@@ -22,14 +22,14 @@ public class block : MonoBehaviour {
 	void Update () {
 
         // add new criterion from game logic
-        if ((building == true) && (Input.GetKeyDown(KeyCode.B)|| this.transform.parent.GetComponent<roadController>().game.PosMessage!= new Vector2(0,0))  )
+        if ((building == true) && (Input.GetKeyDown(KeyCode.B)|| this.transform.parent.GetComponent<roadController>().game.PosInt != 100)  )
         {
-            Vector2 tempPos = this.transform.parent.GetComponent<roadController>().game.PosMessage;
-            if (tempPos != new Vector2(0, 0))
+            int tempPos = this.transform.parent.GetComponent<roadController>().game.PosInt;
+            if (tempPos != 100)
             {
                 //check build position correct
                 int pos = this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].cur_pos;
-                if (pos == tempPos.y * 5 + tempPos.x)
+				if (pos == tempPos)
                 {
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.AddComponent<Rigidbody>();
@@ -49,7 +49,7 @@ public class block : MonoBehaviour {
                     this.transform.parent.GetComponent<roadController>().game.turnChange = true;
                 }
 
-                this.transform.parent.GetComponent<roadController>().game.PosMessage = new Vector2(0, 0);
+				this.transform.parent.GetComponent<roadController>().game.PosInt = 100;
             }
             else
             {
@@ -83,7 +83,7 @@ public class block : MonoBehaviour {
             this.transform.parent.GetComponent<roadController>().game.turnChange = true;
         }
         // add new criterion from game logic
-        else if(mortgage && (Input.GetKeyDown(KeyCode.Keypad1) || this.transform.parent.GetComponent<roadController>().game.PosMessage != new Vector2(0, 0)) ) { 
+		else if(mortgage && (Input.GetKeyDown(KeyCode.Keypad1) || this.transform.parent.GetComponent<roadController>().game.PosInt != 100) ) { 
 
             mortgage = false;
             roadController temp = this.transform.parent.GetComponent<roadController>();
@@ -95,7 +95,8 @@ public class block : MonoBehaviour {
             }
             temp.roads[temp.game.playerOrder[temp.game.curPlayer].properties[0]].GetComponent<block>().buildStack = null;
             temp.panel.buildPanel.SetActive(false);
-            temp.game.turnChange = true;
+			this.transform.parent.GetComponent<roadController>().game.PosInt = 100;
+			temp.game.turnChange = true;
         }
     }
     void OnCollisionEnter(Collision collision) {
