@@ -13,6 +13,13 @@ public class block : MonoBehaviour {
 
     public int property = 10;
     public List<GameObject> buildStack = new List<GameObject>();
+	Dictionary<int, Color> colorMap = new Dictionary<int, Color>()
+	{
+		{ 0, Color.white},
+		{ 1, Color.black},
+	};
+
+
 	// Use this for initialization
 	void Start () {
 		
@@ -32,6 +39,9 @@ public class block : MonoBehaviour {
 				if (pos == tempPos)
                 {
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+					cube.GetComponent<Renderer>().material.color = colorMap[this.transform.parent.GetComponent<roadController>().game.curPlayer];
+
+
                     cube.AddComponent<Rigidbody>();
                     cube.AddComponent<cube>();
                     cube.transform.position = transform.Find("build").transform.position + new Vector3(0, 0.3f, 0);
@@ -54,6 +64,7 @@ public class block : MonoBehaviour {
             else
             {
                 var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+				cube.GetComponent<Renderer>().material.color = colorMap[this.transform.parent.GetComponent<roadController>().game.curPlayer];
                 cube.AddComponent<Rigidbody>();
                 cube.AddComponent<cube>();
                 cube.transform.position = transform.Find("build").transform.position + new Vector3(0, 0.3f, 0);
@@ -83,7 +94,7 @@ public class block : MonoBehaviour {
             this.transform.parent.GetComponent<roadController>().game.turnChange = true;
         }
         // add new criterion from game logic
-		else if(mortgage && (Input.GetKeyDown(KeyCode.Keypad1) || this.transform.parent.GetComponent<roadController>().game.PosInt != 100) ) { 
+		else if(mortgage && (Input.GetKeyDown(KeyCode.M) || this.transform.parent.GetComponent<roadController>().game.PosInt != 100) ) { 
 
             mortgage = false;
             roadController temp = this.transform.parent.GetComponent<roadController>();
@@ -145,7 +156,9 @@ public class block : MonoBehaviour {
     public void Toll() {
         
         this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money -= (this.buildStack.Count * 1000);
-        if (this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money <= 0 && this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].properties.Count==0)
+		this.transform.parent.GetComponent<roadController> ().game.playerOrder [this.property-1].money += (this.buildStack.Count * 1000);
+
+		if (this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money <= 0 && this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].properties.Count==0)
         {
             this.transform.parent.GetComponent<roadController>().game.playerOut = true;
             this.transform.parent.GetComponent<roadController>().game.startTimer = true;

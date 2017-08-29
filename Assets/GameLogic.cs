@@ -14,7 +14,7 @@ public class GameLogic : MonoBehaviour {
     public bool turnChange = false;
     public bool startTimer = false;
     public bool playerOut = false;
-    private int lastPos = 0;
+    //private int lastPos = 0;
     public int moveSteps = 0;
     RFIBricks_Cores RFIB;
     static string[] AllowBlockType = {  /* Color,TAG ON BOTTOM */
@@ -47,24 +47,31 @@ public class GameLogic : MonoBehaviour {
 		{ new Vector2(2,0), 2},
 		{ new Vector2(3,0), 3},
 		{ new Vector2(4,0), 4},
-		{ new Vector2(4,1), 5},
-		{ new Vector2(4,2), 6},
-		{ new Vector2(4,3), 7},
-		{ new Vector2(4,4), 8},
-		{ new Vector2(3,4), 9},
-		{ new Vector2(2,4), 10},
-		{ new Vector2(1,4), 11},
-		{ new Vector2(0,4), 12},
-		{ new Vector2(0,3), 13},
-		{ new Vector2(0,2), 14},
-		{ new Vector2(0,1), 15},
+		{ new Vector2(5,0), 5},
+		{ new Vector2(5,1), 6},
+		{ new Vector2(5,2), 7},
+		{ new Vector2(5,3), 8},
+		{ new Vector2(5,4), 9},
+		{ new Vector2(5,5), 10},
+		{ new Vector2(4,5), 11},
+		{ new Vector2(3,5), 12},
+		{ new Vector2(2,5), 13},
+		{ new Vector2(1,5), 14},
+		{ new Vector2(0,5), 15},
+		{ new Vector2(0,4), 16},
+		{ new Vector2(0,3), 17},
+		{ new Vector2(0,2), 18},
+		{ new Vector2(0,1), 19},
 	};
-
+	Dictionary<int, int> playerMap = new Dictionary<int, int>(){
+		{930102,0},{940101,1},
+	};
 
 
     // Use this for initialization
     void Start () {
-        print(PlayerPrefs.GetInt("PlayerNum"));
+        //print variable from character scene
+		//print(PlayerPrefs.GetInt("PlayerNum"));
 
         RFIB = new RFIBricks_Cores(ReaderIP, ReaderPower, Sensitive, EnableAntenna, Flag_ToConnectTheReade);
         RFIB.setSysTagBased("7428 0000");
@@ -158,12 +165,16 @@ public class GameLogic : MonoBehaviour {
                 Destroy(build_Blocks[BlockID]);
                 build_Blocks.Remove(BlockID);
                 //send destroy message
-                //if player id, save position
-                if (isPlayer(BlockID))
-					print("(1)leave "+playerOrder[curPlayer].cur_pos);
+				if (isPlayer(BlockID)){
+					if (this.curPlayer != playerMap [BlockID])
+						print("not your turn");
+					else
+						print("(1)leave "+playerOrder[curPlayer].cur_pos);
+				}
+					
                 else
                 {
-					//print("(1)remove"+int.Parse(temp[1]));
+					print("(1)remove"+int.Parse(temp[1]));
 					PosInt = int.Parse(temp[1]);
                 }
 
@@ -173,31 +184,32 @@ public class GameLogic : MonoBehaviour {
 
         }
 		else if (build_Blocks.Count > 0)
-            {
-               
-					var buffer = new List<int>(build_Blocks.Keys);
-
-					foreach (int BlockID in buffer)
+            {  
+				var buffer = new List<int>(build_Blocks.Keys);
+		
+				foreach (int BlockID in buffer)
+                {
+					string [] temp = build_Blocks[BlockID].name.Split('/');
+                    if (RFIB.StackedOrders3D.ContainsKey(BlockID) == false)
                     {
-						string [] temp = build_Blocks[BlockID].name.Split('/');
-                        if (RFIB.StackedOrders3D.ContainsKey(BlockID) == false)
-                        {
-                            Destroy(build_Blocks[BlockID]);
-                            build_Blocks.Remove(BlockID);
+                        Destroy(build_Blocks[BlockID]);
+                        build_Blocks.Remove(BlockID);
                             // send destroy message
                             // if player id, save position
-							if (isPlayer(BlockID))
-								print("(2)leave "+playerOrder[curPlayer].cur_pos);
+						if (isPlayer(BlockID)){
+							if (this.curPlayer != playerMap [BlockID])
+								print("not your turn");
 							else
-                            {
-                                
-								print("(2)remove"+int.Parse(temp[1]));
-								PosInt = int.Parse(temp[1]);
-                            }
-                        }
-                        if (build_Blocks.Count == 0) break;
-                    }
-                
+								print("(1)leave "+playerOrder[curPlayer].cur_pos);
+						}
+						else
+                    	{                            
+							print("(2)remove"+int.Parse(temp[1]));
+							PosInt = int.Parse(temp[1]);
+                    	}
+                	}
+                if (build_Blocks.Count == 0) break;
+              	}            
             }
     }
 
@@ -217,11 +229,6 @@ public class GameLogic : MonoBehaviour {
         }
         else if (BlockType == 9601 || BlockType == 9602 || BlockType == 9603 || BlockType == 9604 || BlockType == 9701 || BlockType == 8602 || BlockType == 8603 || BlockType == 8604)
         {
-            //int blockIDa = blockID % 100;
-            //if (blockIDa <= 20) { stroke(255); fill(20); }  //Black
-            //else if (blockIDa <= 30) { stroke(80); fill(255); }  //white
-            //else if (blockIDa <= 40) { stroke(80); fill(200); }  //Gray
-            //else if (blockIDa <= 50) { stroke(80); fill(255, 0, 0); }  //Red
 
         }
 
@@ -238,28 +245,34 @@ public class GameLogic : MonoBehaviour {
             else
                 build_Blocks.Add(blockID, new GameObject());
 
-			build_Blocks[blockID].name = "Block-" + blockID+"/"+lastPos;
+			build_Blocks[blockID].name = "Block-" + blockID+"/"+playerOrder[curPlayer].cur_pos;
 
             //if player id, send move steps
-            // newPos (X,Y) - lastPos
-
             if (isPlayer(blockID))
             {
-				Vector2 a = new Vector2 (X, Y);
-				
-				//print(roadList[a] - lastPos);
-				if ((roadList[a] - lastPos) != 0) {
-					moveSteps = roadList[a] - lastPos;
-					lastPos = roadList[a];
+				//check if valid move
+				if(this.curPlayer == playerMap[blockID]){
+
+					Vector2 a = new Vector2 (X, Y);
+
+					print("move to "+a );
+					if ((roadList [a] - playerOrder [curPlayer].cur_pos) > 0)
+						moveSteps = roadList [a] - playerOrder [curPlayer].cur_pos;
+					else if ((roadList [a] - playerOrder [curPlayer].cur_pos) < 0)
+						moveSteps = roadList [a] - playerOrder [curPlayer].cur_pos + rc.roads.Length;
+					else
+						print ("no move");
 				}
+				else
+					print ("invalid player move");
             }
 
             //send build string to check if correct position
             //PosMessage = new Vector2(X,Y);
             else
             {
-				print("build at"+lastPos);
-				PosInt = lastPos;
+				print("build at"+playerOrder[curPlayer].cur_pos);
+				PosInt = playerOrder[curPlayer].cur_pos;
             }
 
         }
@@ -284,7 +297,7 @@ public class GameLogic : MonoBehaviour {
     }
     bool isPlayer(int id)
     {
-        if (id == 930102)
+		if (id == 930102 || id == 940101)
             return true;
         else
             return false;
