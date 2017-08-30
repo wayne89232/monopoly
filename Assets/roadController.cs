@@ -15,6 +15,7 @@ public class roadController : MonoBehaviour {
         int c = 0;
         foreach (Transform t in transform){
             //Debug.Log(t);
+
             roads[c] = t;
             c++;
         }
