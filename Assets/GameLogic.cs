@@ -4,6 +4,8 @@ using RFIBricks_Cores_Libs;
 using UnityEngine;
 
 public class GameLogic : MonoBehaviour {
+	public bool projectionMode = true;
+
     //public GameObject[] playerList;
     public roadController rc;
     public p1control p1;
@@ -85,7 +87,13 @@ public class GameLogic : MonoBehaviour {
         playerOrder = new p1control[2];
         playerOrder[0] = p1;
         playerOrder[1] = p2;
+
+		if (projectionMode) {
+			p1.gameObject.active = false;
+			p2.gameObject.active = false;
+		}
         curPlayer = 0;
+
         
         //playerCheck = curPlayer;
     }
@@ -100,6 +108,7 @@ public class GameLogic : MonoBehaviour {
         if (turnChange && !startTimer && playerOut)
         {
             playerOrder[curPlayer].gameObject.SetActive(false);
+			playerOrder [curPlayer].gameover = true;
             playerOut = false;
             for (int i = 0; i < playerOrder[curPlayer].properties.Count; i++)
             {
@@ -117,7 +126,7 @@ public class GameLogic : MonoBehaviour {
             do
             {
                 curPlayer = (curPlayer + 1) % playerOrder.Length;
-            } while (!playerOrder[curPlayer].gameObject.activeSelf);
+			} while ((!playerOrder[curPlayer].gameObject.activeSelf)&&playerOrder[curPlayer].gameover);
             playerOrder[curPlayer].transform.gameObject.GetComponent<CapsuleCollider>().enabled = true;
             playerOrder[curPlayer].transform.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
             turnChange = false;
@@ -131,7 +140,7 @@ public class GameLogic : MonoBehaviour {
             do
             {
                 curPlayer = (curPlayer + 1) % playerOrder.Length;
-            } while (!playerOrder[curPlayer].gameObject.activeSelf);           
+			} while ((!playerOrder[curPlayer].gameObject.activeSelf)&&playerOrder[curPlayer].gameover);           
             playerOrder[curPlayer].transform.gameObject.GetComponent<CapsuleCollider>().enabled = true;
             playerOrder[curPlayer].transform.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
             turnChange = false;

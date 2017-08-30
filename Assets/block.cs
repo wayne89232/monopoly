@@ -6,9 +6,9 @@ public class block : MonoBehaviour {
 
     //public panelControl panel = null;
     private string belong = null;
-    private bool building = false;
-    private bool tolling = false;
-    private bool mortgage = false;
+    public bool building = false;
+    public bool tolling = false;
+    public bool mortgage = false;
     public bool target = false;
 
     public int property = 10;
@@ -27,7 +27,6 @@ public class block : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
         // add new criterion from game logic
         if ((building == true) && (Input.GetKeyDown(KeyCode.B)|| this.transform.parent.GetComponent<roadController>().game.PosInt != 100)  )
         {
@@ -46,6 +45,9 @@ public class block : MonoBehaviour {
                     cube.AddComponent<cube>();
                     cube.transform.position = transform.Find("build").transform.position + new Vector3(0, 0.3f, 0);
                     cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+
+					if (this.transform.parent.GetComponent<roadController> ().game.projectionMode)
+						cube.active = false;
 
                     if (buildStack.Count == 0)
                     {
@@ -70,6 +72,8 @@ public class block : MonoBehaviour {
                 cube.AddComponent<cube>();
                 cube.transform.position = transform.Find("build").transform.position + new Vector3(0, 0.3f, 0);
                 cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+				if (this.transform.parent.GetComponent<roadController> ().game.projectionMode)
+					cube.active = false;
 
                 if (buildStack.Count == 0)
                 {
@@ -100,8 +104,12 @@ public class block : MonoBehaviour {
 
             mortgage = false;
             roadController temp = this.transform.parent.GetComponent<roadController>();
+
+			// TODO: fix property based on removed block position
+
             temp.game.playerOrder[temp.game.curPlayer].money += (5000 + temp.roads[temp.game.playerOrder[temp.game.curPlayer].properties[0]].GetComponent<block>().buildStack.Count * 1000);
             temp.roads[temp.game.playerOrder[temp.game.curPlayer].properties[0]].GetComponent<block>().property = 10;
+			temp.roads[temp.game.playerOrder[temp.game.curPlayer].properties[0]].GetComponent<block>().gameObject.GetComponent<Light>().enabled = false;
             for (int j = 0; j < temp.roads[temp.game.playerOrder[temp.game.curPlayer].properties[0]].GetComponent<block>().buildStack.Count; j++)
             {
                 Destroy(temp.roads[temp.game.playerOrder[temp.game.curPlayer].properties[0]].GetComponent<block>().buildStack[j]);
@@ -141,7 +149,7 @@ public class block : MonoBehaviour {
 
        
     }
-	void AutoCollisionTrigger(){
+	public void AutoCollisionTrigger(){
 		if (this.target == true)
 		{
 			if (this.tag == "empty")
@@ -163,22 +171,30 @@ public class block : MonoBehaviour {
 
     public void BuildDialogue(int player)
     {
-        if (this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money - 5000 < 0)
+		roadController temp = this.transform.parent.GetComponent<roadController>();
+        if (temp.game.playerOrder[temp.game.curPlayer].money - 5000 < 0)
         {
             tolling = true;
-            this.transform.parent.GetComponent<roadController>().game.startTimer = true;
-            this.transform.parent.GetComponent<roadController>().panel.question.text = "Not enough money ";
-            this.transform.parent.GetComponent<roadController>().panel.buildPanel.SetActive(true);
-            this.transform.parent.GetComponent<roadController>().panel.timeLeft = 3.0f;
+            temp.game.startTimer = true;
+            temp.panel.question.text = "Not enough money ";
+            temp.panel.buildPanel.SetActive(true);
+            temp.panel.timeLeft = 3.0f;
             StartCoroutine(LateCall(3));
         }
+		else if(temp.roads[temp.game.playerOrder[temp.game.curPlayer].cur_pos].GetComponent<block>().buildStack.Count>=3){
+			tolling = true;
+			temp.game.startTimer = true;
+			temp.panel.question.text = "Build limit reached ";
+			temp.panel.buildPanel.SetActive(true);
+			temp.panel.timeLeft = 3.0f;
+		} 
         else
         {
             building = true;
-            this.transform.parent.GetComponent<roadController>().game.startTimer = true;
-            this.transform.parent.GetComponent<roadController>().panel.question.text = "Build the house?";
-            this.transform.parent.GetComponent<roadController>().panel.buildPanel.SetActive(true);
-            this.transform.parent.GetComponent<roadController>().panel.timeLeft = 10.0f;
+            temp.game.startTimer = true;
+            temp.panel.question.text = "Build the house?";
+            temp.panel.buildPanel.SetActive(true);
+            temp.panel.timeLeft = 10.0f;
             StartCoroutine(LateCall(10));
         }
     }

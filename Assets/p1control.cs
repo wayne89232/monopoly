@@ -10,6 +10,7 @@ public class p1control : MonoBehaviour {
     public int moveSpeed = 1;
     public int money = 0;
     public List<int> properties = new List<int>();
+	public bool gameover = false;
 
     public int cur_pos;
 
@@ -36,10 +37,18 @@ public class p1control : MonoBehaviour {
         // p1.SimpleMove(transform.forward * moveSpeed);
         
         rc.transform.GetComponent<roadController>().roads[(cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length].transform.GetComponent<block>().target = true;
-        MoveToPoint((cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length,steps);
 		int temp = cur_pos;
-        cur_pos = (cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length;
+		if (!game.projectionMode) {
+			MoveToPoint ((cur_pos + steps) % rc.transform.GetComponent<roadController> ().roads.Length, steps);
+			cur_pos = (cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length;
+		} else {
+			if((cur_pos + steps)>=rc.transform.GetComponent<roadController> ().roads.Length)
+				this.money += 2000;
+			cur_pos = (cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length;
+			rc.transform.GetComponent<roadController> ().roads [cur_pos].transform.GetComponent<block> ().AutoCollisionTrigger ();
+		}
 
+        
 		colorSource (temp);
 
         //this.GetComponent<Rigidbody>().isKinematic = false;

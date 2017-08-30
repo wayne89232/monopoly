@@ -23,6 +23,8 @@ public class roadController : MonoBehaviour {
 			}
 				c++;
         }
+		roads[0].GetComponent<Light> ().enabled = true;
+		roads[0].GetComponent<Light> ().color = Color.yellow;
         game.playerOrder[0].initCharPosition();
         game.playerOrder[1].initCharPosition();
         game.playerOrder[1].GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
