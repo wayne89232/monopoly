@@ -22,7 +22,7 @@ public class block : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+
 	}
 	
 	// Update is called once per frame
@@ -49,6 +49,7 @@ public class block : MonoBehaviour {
 
                     if (buildStack.Count == 0)
                     {
+						lightSource ();
                         this.property = this.transform.parent.GetComponent<roadController>().game.curPlayer + 1;
                         this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].properties.Add(this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].cur_pos);
                     }
@@ -72,6 +73,7 @@ public class block : MonoBehaviour {
 
                 if (buildStack.Count == 0)
                 {
+					lightSource ();
                     this.property = this.transform.parent.GetComponent<roadController>().game.curPlayer + 1;
                     this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].properties.Add(this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].cur_pos);
                 }
@@ -110,6 +112,13 @@ public class block : MonoBehaviour {
 			temp.game.turnChange = true;
         }
     }
+	void lightSource(){
+		this.transform.GetChild(0).gameObject.GetComponent<Light> ().enabled = true;
+		if (this.transform.parent.GetComponent<roadController> ().game.curPlayer == 0)
+			this.transform.GetChild (0).gameObject.GetComponent<Light> ().color = Color.red;
+		else
+			this.transform.GetChild (0).gameObject.GetComponent<Light> ().color = Color.blue;
+	}
     void OnCollisionEnter(Collision collision) {
         //print(collision.gameObject.tag);
         if (this.target == true)
@@ -132,6 +141,26 @@ public class block : MonoBehaviour {
 
        
     }
+	void AutoCollisionTrigger(){
+		if (this.target == true)
+		{
+			if (this.tag == "empty")
+			{
+				this.transform.parent.GetComponent<roadController>().game.turnChange = true;
+			}
+			else if (((this.transform.parent.GetComponent<roadController>().game.curPlayer + 1) != this.property) && buildStack.Count != 0)
+			{
+				Toll();
+			}
+			else
+			{
+				BuildDialogue(1);
+			}
+			this.target = false;
+		}
+
+	}
+
     public void BuildDialogue(int player)
     {
         if (this.transform.parent.GetComponent<roadController>().game.playerOrder[this.transform.parent.GetComponent<roadController>().game.curPlayer].money - 5000 < 0)

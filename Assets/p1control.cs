@@ -5,6 +5,7 @@ using UnityEngine;
 public class p1control : MonoBehaviour {
     
     CharacterController p1;
+	public GameLogic game;
     public GameObject rc;
     public int moveSpeed = 1;
     public int money = 0;
@@ -36,9 +37,37 @@ public class p1control : MonoBehaviour {
         
         rc.transform.GetComponent<roadController>().roads[(cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length].transform.GetComponent<block>().target = true;
         MoveToPoint((cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length,steps);
+		int temp = cur_pos;
         cur_pos = (cur_pos + steps) % rc.transform.GetComponent<roadController>().roads.Length;
+
+		colorSource (temp);
+
         //this.GetComponent<Rigidbody>().isKinematic = false;
     }
+	void colorSource(int temp){
+		//light off
+		if (rc.transform.GetComponent<roadController> ().roads [temp].gameObject.GetComponent<Light> ().color == Color.yellow) {
+			if (game.curPlayer == 0)
+				rc.transform.GetComponent<roadController> ().roads [temp].gameObject.GetComponent<Light> ().color = Color.blue;
+			else
+				rc.transform.GetComponent<roadController> ().roads [temp].gameObject.GetComponent<Light> ().color = Color.red;
+		} else {
+			rc.transform.GetComponent<roadController> ().roads [temp].gameObject.GetComponent<Light> ().enabled = false;
+		}
+
+
+		//light on
+		if(game.playerOrder [0].cur_pos == game.playerOrder [1].cur_pos){
+			rc.transform.GetComponent<roadController> ().roads [cur_pos].gameObject.GetComponent<Light> ().color = Color.yellow;
+		}
+		else if(game.curPlayer == 0){
+			rc.transform.GetComponent<roadController> ().roads [cur_pos].gameObject.GetComponent<Light> ().color = Color.red;
+		}
+		else if(game.curPlayer == 1){
+			rc.transform.GetComponent<roadController> ().roads [cur_pos].gameObject.GetComponent<Light> ().color = Color.blue;
+		}
+		rc.transform.GetComponent<roadController> ().roads [cur_pos].gameObject.GetComponent<Light> ().enabled = true;
+	}
     Vector3 ignoreY(Vector3 v3)
     {
         return new Vector3(v3.x, 0, v3.z);

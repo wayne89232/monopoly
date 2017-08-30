@@ -15,9 +15,13 @@ public class roadController : MonoBehaviour {
         int c = 0;
         foreach (Transform t in transform){
             //Debug.Log(t);
-
             roads[c] = t;
-            c++;
+			t.gameObject.GetComponent<Light> ().enabled = false;
+			if (t.gameObject.transform.childCount != 0) {
+				if(t.gameObject.transform.GetChild (0).gameObject.GetComponent<Light>()!=null)
+					t.gameObject.transform.GetChild (0).gameObject.GetComponent<Light> ().enabled = false;
+			}
+				c++;
         }
         game.playerOrder[0].initCharPosition();
         game.playerOrder[1].initCharPosition();
@@ -32,6 +36,7 @@ public class roadController : MonoBehaviour {
         // add steps from gamelogic
 
         if (Input.GetKeyDown(KeyCode.Alpha1) || (game.moveSteps == 1)) {
+			
             game.playerOrder[game.curPlayer].movebystep(1);
             game.moveSteps = 0;
             //p1.teleport(3);
@@ -67,4 +72,5 @@ public class roadController : MonoBehaviour {
             //p1.teleport(3);
         }
     }
+
 }
