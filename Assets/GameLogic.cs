@@ -28,13 +28,13 @@ public class GameLogic : MonoBehaviour {
 		"9701",
     };
     static string[] PreStackOrders = {
-        "7428 0000 9999 0101 0001,7428 0000 9101 0101 0001",
-        "7428 0000 9999 0201 0001,7428 0000 9101 0201 0001",
+        "7429 0000 9999 0101 0001,7429 0000 9101 0101 0001",
+        "7429 0000 9999 0201 0001,7429 0000 9101 0301 0001",
     };
     short[] EnableAntenna = { 1, 2, 3, 4 };
     int boxNumX = 5, boxNumY = 5;
     string ReaderIP = "192.168.1.93";
-    double ReaderPower = 30, Sensitive = -70;
+    double ReaderPower = 32, Sensitive = -70;
     bool Flag_ToConnectTheReade = true;
     bool Flag_AllowStackWithoutConnectingBoard = true;
     public Dictionary<int, GameObject> build_Blocks = new Dictionary<int, GameObject>();  //BlockID
@@ -66,7 +66,7 @@ public class GameLogic : MonoBehaviour {
 		{ new Vector2(0,1), 19},
 	};
 	Dictionary<int, int> playerMap = new Dictionary<int, int>(){
-		{930102,0},{940101,1},
+		{910102,0},{910110,1},
 	};
 
 
@@ -76,7 +76,7 @@ public class GameLogic : MonoBehaviour {
 		//print(PlayerPrefs.GetInt("PlayerNum"));
 
         RFIB = new RFIBricks_Cores(ReaderIP, ReaderPower, Sensitive, EnableAntenna, Flag_ToConnectTheReade);
-        RFIB.setSysTagBased("7428 0000");
+        RFIB.setSysTagBased("7429 0000");
         RFIB.setAllowBlockType(AllowBlockType);
 
         RFIB.startReceive();
@@ -292,11 +292,11 @@ public class GameLogic : MonoBehaviour {
 
         if (Input.GetKey("t"))
         {
-            RFIB._Testing_AddTestingTemporarilyTag("7428 0000 9999 0303 0001", "7428 0000 9401 2201 0001");
+            RFIB._Testing_AddTestingTemporarilyTag("7429 0000 9999 0303 0001", "7429 0000 9401 2201 0001");
         }
         if (Input.GetKey("f"))
         {
-            RFIB._Testing_AddHoldingTag("7428 0000 9999 0302 0001", "7428 0000 9201 4401 0001");
+            RFIB._Testing_AddHoldingTag("7429 0000 9999 0302 0001", "7429 0000 9201 4401 0001");
         }
 
 
@@ -306,7 +306,7 @@ public class GameLogic : MonoBehaviour {
     }
     bool isPlayer(int id)
     {
-		if (id == 930102 || id == 940101)
+		if (id == 910102 || id == 910110)
             return true;
         else
             return false;
