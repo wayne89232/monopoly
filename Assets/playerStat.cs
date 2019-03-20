@@ -13,7 +13,7 @@ public class playerStat : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (!this.transform.parent.GetComponent<panelControl>().game.playerOrder[System.Int32.Parse(this.tag) - 1].gameObject.activeSelf)
+		if (this.transform.parent.GetComponent<panelControl>().game.playerOrder[System.Int32.Parse(this.tag) - 1].gameover)
         {
             playerMoney.text = "Bankrupted";
         }

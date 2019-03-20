@@ -4,6 +4,8 @@ using RFIBricks_Cores_Libs;
 using UnityEngine;
 
 public class GameLogic : MonoBehaviour {
+	public bool projectionMode = true;
+
     //public GameObject[] playerList;
     public roadController rc;
     public p1control p1;
@@ -14,7 +16,7 @@ public class GameLogic : MonoBehaviour {
     public bool turnChange = false;
     public bool startTimer = false;
     public bool playerOut = false;
-    private int lastPos = 0;
+    //private int lastPos = 0;
     public int moveSteps = 0;
     RFIBricks_Cores RFIB;
     static string[] AllowBlockType = {  /* Color,TAG ON BOTTOM */
@@ -26,27 +28,55 @@ public class GameLogic : MonoBehaviour {
 		"9701",
     };
     static string[] PreStackOrders = {
-        "7428 0000 9999 0101 0001,7428 0000 9101 0101 0001",
-        "7428 0000 9999 0201 0001,7428 0000 9101 0201 0001",
+        "7429 0000 9999 0101 0001,7429 0000 9101 0101 0001",
+        "7429 0000 9999 0201 0001,7429 0000 9101 0301 0001",
     };
     short[] EnableAntenna = { 1, 2, 3, 4 };
     int boxNumX = 5, boxNumY = 5;
     string ReaderIP = "192.168.1.93";
-    double ReaderPower = 30, Sensitive = -70;
+    double ReaderPower = 32, Sensitive = -70;
     bool Flag_ToConnectTheReade = true;
     bool Flag_AllowStackWithoutConnectingBoard = true;
     public Dictionary<int, GameObject> build_Blocks = new Dictionary<int, GameObject>();  //BlockID
     public Vector2 PosMessage = new Vector2(0,0);
+	public int PosInt = 100;
     private int tempCount1 = 100;
     private int tempCount2 = 100;
+	Dictionary<Vector2, int> roadList = new Dictionary<Vector2, int>()
+	{
+		{ new Vector2(0,0), 0},
+		{ new Vector2(1,0), 1},
+		{ new Vector2(2,0), 2},
+		{ new Vector2(3,0), 3},
+		{ new Vector2(4,0), 4},
+		{ new Vector2(5,0), 5},
+		{ new Vector2(5,1), 6},
+		{ new Vector2(5,2), 7},
+		{ new Vector2(5,3), 8},
+		{ new Vector2(5,4), 9},
+		{ new Vector2(5,5), 10},
+		{ new Vector2(4,5), 11},
+		{ new Vector2(3,5), 12},
+		{ new Vector2(2,5), 13},
+		{ new Vector2(1,5), 14},
+		{ new Vector2(0,5), 15},
+		{ new Vector2(0,4), 16},
+		{ new Vector2(0,3), 17},
+		{ new Vector2(0,2), 18},
+		{ new Vector2(0,1), 19},
+	};
+	Dictionary<int, int> playerMap = new Dictionary<int, int>(){
+		{910102,0},{910110,1},
+	};
 
 
     // Use this for initialization
     void Start () {
-        print(PlayerPrefs.GetInt("PlayerNum"));
+        //print variable from character scene
+		//print(PlayerPrefs.GetInt("PlayerNum"));
 
         RFIB = new RFIBricks_Cores(ReaderIP, ReaderPower, Sensitive, EnableAntenna, Flag_ToConnectTheReade);
-        RFIB.setSysTagBased("7428 0000");
+        RFIB.setSysTagBased("7429 0000");
         RFIB.setAllowBlockType(AllowBlockType);
 
         RFIB.startReceive();
@@ -57,7 +87,13 @@ public class GameLogic : MonoBehaviour {
         playerOrder = new p1control[2];
         playerOrder[0] = p1;
         playerOrder[1] = p2;
+
+		if (projectionMode) {
+			p1.gameObject.active = false;
+			p2.gameObject.active = false;
+		}
         curPlayer = 0;
+
         
         //playerCheck = curPlayer;
     }
@@ -72,6 +108,7 @@ public class GameLogic : MonoBehaviour {
         if (turnChange && !startTimer && playerOut)
         {
             playerOrder[curPlayer].gameObject.SetActive(false);
+			playerOrder [curPlayer].gameover = true;
             playerOut = false;
             for (int i = 0; i < playerOrder[curPlayer].properties.Count; i++)
             {
@@ -89,7 +126,7 @@ public class GameLogic : MonoBehaviour {
             do
             {
                 curPlayer = (curPlayer + 1) % playerOrder.Length;
-            } while (!playerOrder[curPlayer].gameObject.activeSelf);
+			} while ((!playerOrder[curPlayer].gameObject.activeSelf)&&playerOrder[curPlayer].gameover);
             playerOrder[curPlayer].transform.gameObject.GetComponent<CapsuleCollider>().enabled = true;
             playerOrder[curPlayer].transform.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
             turnChange = false;
@@ -103,7 +140,7 @@ public class GameLogic : MonoBehaviour {
             do
             {
                 curPlayer = (curPlayer + 1) % playerOrder.Length;
-            } while (!playerOrder[curPlayer].gameObject.activeSelf);           
+			} while ((!playerOrder[curPlayer].gameObject.activeSelf)&&playerOrder[curPlayer].gameover);           
             playerOrder[curPlayer].transform.gameObject.GetComponent<CapsuleCollider>().enabled = true;
             playerOrder[curPlayer].transform.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
             turnChange = false;
@@ -129,20 +166,25 @@ public class GameLogic : MonoBehaviour {
 
         if (RFIB.StackedOrders3D.Count == 0 && build_Blocks.Count > 0)
         {
-            foreach (int BlockID in build_Blocks.Keys)
+			var buffer = new List<int>(build_Blocks.Keys);
+
+			foreach (int BlockID in buffer)
             {
+				string [] temp = build_Blocks[BlockID].name.Split('/');
                 Destroy(build_Blocks[BlockID]);
                 build_Blocks.Remove(BlockID);
                 //send destroy message
-                //if player id, save position
-                if (isPlayer(BlockID))
-                    print(playerOrder[curPlayer].cur_pos);
-                    //lastPos = playerOrder[curPlayer].cur_pos;
+				if (isPlayer(BlockID)){
+					if (this.curPlayer != playerMap [BlockID])
+						print("not your turn");
+					else
+						print("(1)leave "+playerOrder[curPlayer].cur_pos);
+				}
+					
                 else
                 {
-                    string[] temp = build_Blocks[BlockID].name.Split('/');
-                    print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
-                    //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
+					print("(1)remove"+int.Parse(temp[1]));
+					PosInt = int.Parse(temp[1]);
                 }
 
                 if (build_Blocks.Count == 0) break;
@@ -150,42 +192,39 @@ public class GameLogic : MonoBehaviour {
 
 
         }
-
-        if (tempCount2 != (build_Blocks.Count))
-        {
-            if (build_Blocks.Count > 0)
-            {
-                try
+		else if (build_Blocks.Count > 0)
+            {  
+				var buffer = new List<int>(build_Blocks.Keys);
+		
+				foreach (int BlockID in buffer)
                 {
-                    foreach (int BlockID in build_Blocks.Keys)
+					string [] temp = build_Blocks[BlockID].name.Split('/');
+                    if (RFIB.StackedOrders3D.ContainsKey(BlockID) == false)
                     {
-                        if (RFIB.StackedOrders3D.ContainsKey(BlockID) == false)
-                        {
-                            Destroy(build_Blocks[BlockID]);
-                            build_Blocks.Remove(BlockID);
+                        Destroy(build_Blocks[BlockID]);
+                        build_Blocks.Remove(BlockID);
                             // send destroy message
                             // if player id, save position
-                            if (isPlayer(BlockID))
-                                print(playerOrder[curPlayer].cur_pos);
-                                //lastPos = playerOrder[curPlayer].cur_pos;
-                            else
-                            {
-                                string [] temp = build_Blocks[BlockID].name.Split('/');
-                                print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
-                                //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
-                            }
-                        }
-                        if (build_Blocks.Count == 0) break;
-                    }
-                }
-                catch { }
+						if (isPlayer(BlockID)){
+							if (this.curPlayer != playerMap [BlockID])
+								print("not your turn");
+							else
+								print("(1)leave "+playerOrder[curPlayer].cur_pos);
+						}
+						else
+                    	{                            
+							print("(2)remove"+int.Parse(temp[1]));
+							PosInt = int.Parse(temp[1]);
+                    	}
+                	}
+                if (build_Blocks.Count == 0) break;
+              	}            
             }
-            tempCount2 = build_Blocks.Count;
-        }
     }
 
     public void AddBuildBlocks(int blockID, int BlockType, int X, int Y, int Z)
     {
+		
         Color tmpColor = new Color(255, 0, 0);
 
         //========== Set Color ================
@@ -199,11 +238,6 @@ public class GameLogic : MonoBehaviour {
         }
         else if (BlockType == 9601 || BlockType == 9602 || BlockType == 9603 || BlockType == 9604 || BlockType == 9701 || BlockType == 8602 || BlockType == 8603 || BlockType == 8604)
         {
-            //int blockIDa = blockID % 100;
-            //if (blockIDa <= 20) { stroke(255); fill(20); }  //Black
-            //else if (blockIDa <= 30) { stroke(80); fill(255); }  //white
-            //else if (blockIDa <= 40) { stroke(80); fill(200); }  //Gray
-            //else if (blockIDa <= 50) { stroke(80); fill(255, 0, 0); }  //Red
 
         }
 
@@ -220,23 +254,34 @@ public class GameLogic : MonoBehaviour {
             else
                 build_Blocks.Add(blockID, new GameObject());
 
-            build_Blocks[blockID].name = "Block-" + blockID+"/"+X+"/"+Y;
+			build_Blocks[blockID].name = "Block-" + blockID+"/"+playerOrder[curPlayer].cur_pos;
 
             //if player id, send move steps
-            // newPos (X,Y) - lastPos
             if (isPlayer(blockID))
             {
-                print((5 * Y + X) - lastPos);
-                //moveSteps = (5*Y+X)-lastPos;
+				//check if valid move
+				if(this.curPlayer == playerMap[blockID]){
+
+					Vector2 a = new Vector2 (X, Y);
+
+					print("move to "+a );
+					if ((roadList [a] - playerOrder [curPlayer].cur_pos) > 0)
+						moveSteps = roadList [a] - playerOrder [curPlayer].cur_pos;
+					else if ((roadList [a] - playerOrder [curPlayer].cur_pos) < 0)
+						moveSteps = roadList [a] - playerOrder [curPlayer].cur_pos + rc.roads.Length;
+					else
+						print ("no move");
+				}
+				else
+					print ("invalid player move");
             }
 
             //send build string to check if correct position
             //PosMessage = new Vector2(X,Y);
             else
             {
-                string[] temp = build_Blocks[blockID].name.Split('/');
-                //PosMessage = new Vector2(int.Parse(temp[1]), int.Parse(temp[2]));
-                print(new Vector2(int.Parse(temp[1]), int.Parse(temp[2])));
+				print("build at"+playerOrder[curPlayer].cur_pos);
+				PosInt = playerOrder[curPlayer].cur_pos;
             }
 
         }
@@ -247,11 +292,11 @@ public class GameLogic : MonoBehaviour {
 
         if (Input.GetKey("t"))
         {
-            RFIB._Testing_AddTestingTemporarilyTag("7428 0000 9999 0303 0001", "7428 0000 9401 2201 0001");
+            RFIB._Testing_AddTestingTemporarilyTag("7429 0000 9999 0303 0001", "7429 0000 9401 2201 0001");
         }
         if (Input.GetKey("f"))
         {
-            RFIB._Testing_AddHoldingTag("7428 0000 9999 0302 0001", "7428 0000 9201 4401 0001");
+            RFIB._Testing_AddHoldingTag("7429 0000 9999 0302 0001", "7429 0000 9201 4401 0001");
         }
 
 
@@ -261,7 +306,7 @@ public class GameLogic : MonoBehaviour {
     }
     bool isPlayer(int id)
     {
-        if (id == 1234)
+		if (id == 910102 || id == 910110)
             return true;
         else
             return false;
